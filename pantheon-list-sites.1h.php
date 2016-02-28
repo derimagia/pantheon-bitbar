@@ -78,11 +78,6 @@ foreach ($items as $item) {
 }
 exit(0);
 
-$html = template($items);
-unlink($html_filepath);
-file_put_contents($html_filepath, $html);
-exit(0);
-
 /**
  * Open the dashboard for a site
  */
@@ -222,68 +217,4 @@ function get_config() {
  */
 function save_config($config) {
   return file_put_contents(CONFIG_PATH, json_encode($config));
-}
-
-/**
- * Print out the HTML
- */
-function template($items = array()) {
-$js = json_encode($items);
-$pantheon_logo_base64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAMAUExURQAAAB8fHiMjIv///97e3/3hL/T0/+vmwLGxsbKysh4iN7W1tVxcXL6+vv//+WFhYf///F9fX1lZWfj48+Li5xwhNermyv/iMuvmxR0hM////x0dHfz55P357v/66f//++/VNZGRlP/jNebm7f////352QkJCf///6WlpYGBgYWFhWlpaWRkZHJycsDAwODg4IiIiLCwsHJycj09PUBAQIeHh3p6evjtrPf37fThdu3RH/v33v////v21fLy5a2trfz1zffqn/ThcPDZRfbliPHcVfjvtvjvr/373v3fIh8kOu3p5ebhuerq6vz102xsbF1dXe7TKu7UL15eXrS0svbYKf396dDU4NHR0f371/////////n59v/wZB8iLry+2eLk+v/8pbu7u1JSUlpaWq6urkZGRkNDQ1ZWVr+/v/XmijIyMkRERPfsp/HbUfLfaP/87vHdWfPgZ/HaUfPeZPbqmu3RJ/HcVh4jNfTiefnxvt7e3klJSfjusP//6fjojCAhJPXje/DZS//46v/////jMPXlfvz214aGhvbplO/XPf/23vrxuvfnjvLeXx0eJ05OTv//56CgoPXmifXjf//zgvfnkebm2vDYRf3dIBweKa6ursbGxrS0tPzbFoyMjBccMHh4eObixe3ktOrq6oyMjPj4+G1tbWBjePfbJ9/ctfrYBi4wRhkbML29vfTdSJmdzP//yru7u+TfxQkNHxkZGe/WMqSs3v/1zyQkJLGxsfnhMyUlJZeVkhgZI5ubl6enpXJ2kaSnyi0vSP//rURHXPzqTvzsV1xeYf/tbf/6fv//////zy8xQP//wQEBBYCDov//pV9jfvnkOv//4///n6+11L/E4YiNrP///7S0tAAAAO7QG+3QG+3NDezLAuzNCu7RHurGAOrFAO3PG+zIAO3OEuvJAAEBAevHAO7RHfDXPu3OEOzLB+zLAurIAOzLBO7QGO3PFvDVMfDXPO7RIOi+AOnEAO3JAO7SI/XWGfDVOejDAO/KAPjcJe/GAF5WfaoAAADbdFJOUwD7+yEe6QNBa2jgU6lHI6UeusYQGuBA6j/fAfo1KyMS9n/qHBBP/Rh0qYK4ubtPLZpotungpLWSHcf8QgZIFFlZe738s9d5h0Pq4CNDNyWqpvz7wU/8OiFLOQ0nPMvaQC95QK2qSenpqUjY6NWM5NIn6dbfxJb53uGXXze+fxii97PYJQnloXOSmfo/cKzh7MwLfKe8rqMq5/7paF4+6XrimD5WPogomp/zSfXh3lbrN1xIMev8+T425mz17Zv3hWyKV9CBudbOrb+lLFXHQvxbaovwSc3INGxcd/PwkOYAAAMxSURBVFjDpZcFcNNQGIDT0bUbWlZox1zZ8G3IhkyYwYQBMzY2ZLgz3N3d3d3d3d1dmvSa0K10pGk7Cw5JoV13B3d5eV/uniT3vntJXv73B0H+gaglAsngYEhB2LcISMM4pR+cwCdvOuQUppUughO01RGxcIbF35ULoAQLKW3yZBjBsvkUESOCMczTFhLRMIIZJSpS3wbGMFuLG1ShfEa6V2WRzCHzcU0LCQ+Bb1HRJ4aoL4UoSoxoBS7o7EFTGooyoJgaMxIreUxhksaIqlEUVWNoAanl8SDdkw3McBRjD1yn8wU3TKFVShNMRRL5rsAC6aw4WxPyfSW28gNdQMcLw2TiPyQmJe0Xi3esETJ04rywmwkEY+Mrmti6V3qwZvzYqTYMgqYcxzdSWNOuvaXZmKPAvpxgWztLswlHgWc5Qe2speZmH46CuuYBgway5fIJEyuz9OrZkKOgjlkwN5stbZBN4ZVYwntLuQkaWGYvSWGrjC2KjywKRQA3QT3L/ftnsGVKgrnvwE1Q3yK4mHWOrXbvARNUL3sF7/3Zsv3Ov90gIMGpS55v34iunLezO4xstDMRAiSo3dnnWQ4iumpv779rgz1DYKA32C08f/mr9NVr60UVBPYQn3h3oX++e2QlcAB8jU99P394fB1cYFlIXSUv6Nt+l8sEAYBLWdEth/j8sFPq8Sos/VN7SAE/JsWtB1/pe6K7HaqxdOjXEPxz7n6f/pp9w9zrCx5QrqX/oG92Aw0o1iGt+x36gl9XwJCGNHMWCJZUrMVw8kymJu/Y0UM11wtsBM5NOYf1GkKhLFHm6OgoO3H2NH3Ebbs4gTkldALK0tbFecnlXmnJHQvz07w2rwLf3VZ/oJQqhkLcqFJpSBdwQyRh2l/V7BarJlaAC2au1eKMAVMzGz1mKHIHN+SW6HE1hpNMrkFRdGseeUaEQYdj+R5RxcXFn74Md+JhCNaTBZphkgpszpXLK9OLJIyk0gXhT6shWpxoDpNsurXQKAtcYQyhOoN+FFTaH6snPKCSdiSa0I6HEjiNKY2B+/kJGU1kwhla0iMh/wFbU26QhqHNIQU+A1wgDa7p/7vyG6UfRMrV+1PBAAAAAElFTkSuQmCC";
-$template = <<<HTML
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-	<style type="text/css">
-    * {
-      user-select: none;
-      -webkit-user-select: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    html, body {
-      width: 100%;
-    }
-
-		body {
-			white-space: nowrap;
-			font-family: "Lucida Grande";
-			font-size: 12px;
-			line-height: 22px;
-		}
-    .container {
-      display: flex;
-      width: 100%;
-    }
-		.pantheon-logo {
-      width: 22px;
-      height: 22px;
-		}
-
-	</style>
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-</head>
-<body>
-  <div class="container">
-    <img class="pantheon-logo" src="$pantheon_logo_base64" />
-  </div>
-	<script>
-    var items = $js;
-		jQuery(function($){
-      $(window).contextmenu(function() {
-        BitBar.showWebInspector();
-      });
-			$(window).click(function () {
-        BitBar.resetMenu();
-        BitBar.addMenuItems(items);
-        BitBar.showMenu();
-			});
-		});
-	</script>
-</body>
-</html>
-HTML;
-return $template;
 }

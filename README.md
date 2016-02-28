@@ -1,7 +1,7 @@
 ## Pantheon Bitbar
 
 
-A [Bitbar](https://getbitbar.com/) Plugin for Pantheon
+A [Bitbar](https://getbitbar.com/) Plugin for [Pantheon](https://pantheon.io/)
 
 
 ![Screenshot](https://i.imgur.com/VYBizXY.png)

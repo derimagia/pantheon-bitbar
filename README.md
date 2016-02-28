@@ -23,8 +23,13 @@ A [Bitbar](https://getbitbar.com/) Plugin for [Pantheon](https://pantheon.io/)
 ### Installing
 
 You have two choices:
-1. If you already have Bitbar you can simply [Click here!](bitbar://openPlugin?title=Pantheon&src=https://raw.githubusercontent.com/derimagia/pantheon-bitbar/master/pantheon-list-sites.1h.php)
-2. Clone this repo and copy the script to your Bitbar plugin's folder.
+
+If you already have Bitbar you can copy this command into your console to install it:
+```bash
+open "bitbar://openPlugin?title=Pantheon&src=https://raw.githubusercontent.com/derimagia/pantheon-bitbar/master/pantheon-list-sites.1h.php"
+```
+
+You can also simply clone this repo and copy the script to your Bitbar plugin's folder.
 
 ### Issues
 

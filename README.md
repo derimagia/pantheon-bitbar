@@ -21,7 +21,10 @@ A [Bitbar](https://getbitbar.com/) Plugin for [Pantheon](https://pantheon.io/)
 
 
 ### Installing
-1. Clone this repo and copy the script to your Bitbar plugin's folder.
+
+You have two choices:
+1. If you already have Bitbar you can simply [Click here!](bitbar://openPlugin?title=Pantheon&src=https://raw.githubusercontent.com/derimagia/pantheon-bitbar/master/pantheon-list-sites.1h.php)
+2. Clone this repo and copy the script to your Bitbar plugin's folder.
 
 ### Issues
 

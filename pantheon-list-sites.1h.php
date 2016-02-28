@@ -5,9 +5,10 @@
 // <bitbar.version>v1.0</bitbar.version>
 // <bitbar.author>Dave Wikoff</bitbar.author>
 // <bitbar.author.github>derimagia</bitbar.author.github>
-// <bitbar.desc>List all of your sites you are on in Pantheon.</bitbar.desc>
+// <bitbar.desc>List and manage all of your sites you are on in Pantheon.</bitbar.desc>
 // <bitbar.dependencies>php, terminus</bitbar.dependencies>
 // <bitbar.image>https://i.imgur.com/VYBizXY.png</bitbar.image>
+// <bitbar.abouturl>https://github.com/derimagia/pantheon-bitbar</bitbar.abouturl>
 
 define('TERMINUS_PATH', '/usr/local/bin/terminus');
 define('CONFIG_PATH', '/tmp/pantheon-list-sites-config.json');

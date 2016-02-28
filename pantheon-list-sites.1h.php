@@ -7,7 +7,7 @@
 // <bitbar.author.github>derimagia</bitbar.author.github>
 // <bitbar.desc>List all of your sites you are on in Pantheon.</bitbar.desc>
 // <bitbar.dependencies>php, terminus</bitbar.dependencies>
-// <bitbar.image>http://i.imgur.com/2ark3Bq.png</bitbar.image>
+// <bitbar.image>https://i.imgur.com/VYBizXY.png</bitbar.image>
 
 define('TERMINUS_PATH', '/usr/local/bin/terminus');
 define('CONFIG_PATH', '/tmp/pantheon-list-sites-config.json');

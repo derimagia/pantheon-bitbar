@@ -37,4 +37,4 @@ You can also simply clone this repo and copy the script to your Bitbar plugin's 
 
 ### Suggestions
 
-Feel free to open any issues or pull reuqests to contribute.
+Feel free to open any issues or pull requests to contribute.

@@ -36,10 +36,6 @@ if (!is_array($sites)) {
   echo 'Could not get site list. Did you auth using Terminus?';
   exit();
 }
-if (!getenv('TERMINUS_ENV')) {
-  putenv('TERMINUS_ENV=dev');
-}
-
 
 $symbolMap = [
   'dev' => '🔵',

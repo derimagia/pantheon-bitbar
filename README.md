@@ -16,7 +16,7 @@ A [Bitbar](https://getbitbar.com/) Plugin for [Pantheon](https://pantheon.io/)
 
 ### Prerequesites
 
-1. [Terminus](https://github.com/pantheon-systems/terminus/) - 
+1. [Terminus](https://github.com/pantheon-systems/terminus/) - (Make sure you add a machine key and have authed)
 2. [Bitbar](https://getbitbar.com/)
 
 

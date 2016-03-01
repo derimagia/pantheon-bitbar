@@ -12,10 +12,13 @@
 
 define('TERMINUS_PATH', '/usr/local/bin/terminus');
 define('CONFIG_PATH', '/tmp/pantheon-list-sites-config.json');
+define('DEBUG_MODE', false);
 
 $php = PHP_BINARY;
 $script = $argv[0];
 $directory = dirname(__FILE__);
+$html_filename = pathinfo(__FILE__, PATHINFO_FILENAME) . '.dynamic.html';
+$html_filepath = $directory . '/' . $html_filename;
 $config = get_config();
 $env_id = $config->env_id ? $config->env_id : 'dev';
 
@@ -34,6 +37,10 @@ if (!is_array($sites)) {
   echo 'Could not get site list. Did you auth using Terminus?';
   exit();
 }
+if (!getenv('TERMINUS_ENV')) {
+  putenv('TERMINUS_ENV=dev');
+}
+
 
 $symbolMap = [
   'dev' => '🔵',
@@ -192,8 +199,21 @@ function drush($site_id, $env_id, $drush_command) {
  */
 function passthrough_return($command) {
   ob_start();
-  passthru($command . ' 2>/dev/null');
+
+  if (!DEBUG_MODE) {
+    $command = $command . ' 2>/dev/null';
+  }
+
+  passthru($command);
   $output = ob_get_clean();
+
+  if (DEBUG_MODE) {
+    echo "----- DEBUG [$command] -----\n";
+    echo "OUTPUT:\n";
+    var_dump($output);
+    echo "\n";
+  }
+
   return $output;
 }
 

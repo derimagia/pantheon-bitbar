@@ -31,9 +31,10 @@ open "bitbar://openPlugin?title=Pantheon&src=https://raw.githubusercontent.com/d
 
 You can also simply clone this repo and copy the script to your Bitbar plugin's folder.
 
-### Issues
+### Common Issues
 
-1. Confirm terminus is located at `/usr/local/bin/terminus`. If it is not, you can change this at the top of the script.
+1. Make sure the command `terminus sites list --format=json` returns your sites in JSON format. If it does not, update your terminus version.
+2. Confirm terminus is located at `/usr/local/bin/terminus`. If it is not, you can change this at the top of the script.
 
 ### Suggestions
 

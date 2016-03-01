@@ -37,10 +37,6 @@ if (!is_array($sites)) {
   echo 'Could not get site list. Did you auth using Terminus?';
   exit();
 }
-if (!getenv('TERMINUS_ENV')) {
-  putenv('TERMINUS_ENV=dev');
-}
-
 
 $symbolMap = [
   'dev' => '🔵',
@@ -58,9 +54,9 @@ $items = array(
 foreach ($sites as $site) {
   $items[] = ['title' => $site->name, 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'false'];
   if ($site->framework === 'drupal') {
-    $items[] = ['title' => "$site->name -- 🔒", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'false'];
+    $items[] = ['title' => "$site->name -- 🔒", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'true'];
   }
-  $items[] = ['title' => '└ Pantheon Dashboard -- ⚡', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'false'];
+  $items[] = ['title' => '└ Pantheon Dashboard -- ⚡', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'true'];
   $items[] = '---';
 }
 
@@ -185,8 +181,6 @@ function drush($site_id, $env_id, $drush_command) {
   $remote_host = $alias['remote-host'];
   $remote_user = $alias['remote-user'];
   $ssh_options = $alias['ssh-options'] . ' -o "StrictHostKeyChecking=no" -o "UserKnownHostsFile=/dev/null"';
-
-  $drush_command .= ' --pipe';
 
   $command = escapeshellarg('drush ' . $drush_command);
   $command = 'ssh -T ' . $remote_user . '@' . $remote_host . ' ' . $ssh_options . ' ' . $command;

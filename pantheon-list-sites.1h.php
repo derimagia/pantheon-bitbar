@@ -38,18 +38,14 @@ if (!is_array($sites)) {
   exit();
 }
 
-$symbolMap = [
-  'dev' => '🔵',
-  'test' => '⚫',
-  'live' => '🔴',
-];
-
-$symbol = isset($symbolMap[$env_id]) ? $symbolMap[$env_id] : '';
-
-$items = array(
-  ['title'  => "Environment: $env_id -- $symbol", 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_switch_environment', 'param3' => $env_id, 'terminal' => 'false', 'refresh' => 'true'],
-  '---',
-);
+/**
+ * Build environment selection menu
+ */
+$items = array(['title'  => 'Environment: '.ucfirst($env_id)]);
+foreach (array('dev','test','live') as $environment) {
+	$items[] = ($env_id == $environment ? ['title'  => '--'.ucfirst($environment), 'color' => 'gray'] : ['title'  => '--'.ucfirst($environment), 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_switch_environment', 'param3' => $environment, 'terminal' => 'false', 'refresh' => 'true']);
+}
+$items[] = '---';
 
 foreach ($sites as $site) {
   $items[] = ['title' => $site->name, 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'false'];
@@ -67,7 +63,7 @@ foreach ($items as $item) {
   if (is_array($item)) {
     $parts = [];
     foreach ($item as $param => $value) {
-      $parts[] = $param . '="' . $value . '"';
+      if ($param != 'title') $parts[] = $param . '="' . $value . '"';
     }
     $item = $item['title'] . ' | ' . implode(' ', $parts);
   }
@@ -94,20 +90,10 @@ function drush_user_login($site_id, $env_id) {
 /**
  * Switch the environment
  */
-function pantheon_switch_environment($current_env_id) {
+function pantheon_switch_environment($new_env_id) {
   global $script, $env_id, $config;
 
-  $environments = ['dev', 'test', 'live'];
-
-  foreach ($environments as $env) {
-    if ($env == $current_env_id) {
-      break;
-    }
-  }
-
-  $next_env = current($environments) ? current($environments) : 'dev';
-
-  $config->env_id = $next_env;
+  $config->env_id = $new_env_id;
   save_config($config);
 }
 

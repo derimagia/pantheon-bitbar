@@ -4,7 +4,7 @@
 A [Bitbar](https://getbitbar.com/) Plugin for [Pantheon](https://pantheon.io/)
 
 
-![Screenshot](https://i.imgur.com/VYBizXY.png)
+![Screenshot](https://i.imgur.com/JQO5Eh3.png)
 
 ### Features: 
 

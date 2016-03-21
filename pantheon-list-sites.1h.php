@@ -11,7 +11,7 @@
 // <bitbar.abouturl>https://github.com/derimagia/pantheon-bitbar</bitbar.abouturl>
 
 define('TERMINUS_PATH', '/usr/local/bin/terminus');
-define('CONFIG_PATH', '/tmp/pantheon-list-sites-config.json');
+define('CACHE_PATH', '/tmp/pantheon-list-sites-cache.json');
 define('DEBUG_MODE', false);
 
 $php = PHP_BINARY;
@@ -19,8 +19,7 @@ $script = escapeshellarg($argv[0]);
 $directory = dirname(__FILE__);
 $html_filename = pathinfo(__FILE__, PATHINFO_FILENAME) . '.dynamic.html';
 $html_filepath = $directory . '/' . $html_filename;
-$config = get_config();
-$env_id = $config->env_id ? $config->env_id : 'dev';
+$cache = get_cache();
 
 if (!empty($argv[1]) && function_exists($argv[1])) {
   $args = $argv;
@@ -31,31 +30,63 @@ if (!empty($argv[1]) && function_exists($argv[1])) {
   exit(0);
 }
 
-$sites = terminus("sites list --cached");
 
-if (!is_array($sites)) {
-  echo 'Could not get site list. Did you auth using Terminus?';
-  exit();
+/**
+ * Fetch site information
+ */
+if (isset($cache->sites)) {
+	$sites = $cache->sites;
+} else {
+	$sites = terminus("sites list");
+
+	if (!is_array($sites)) {
+		echo 'Could not get site list. Did you auth using Terminus?';
+		exit();
+	}
+
+	/* Fetch a list of environments for each site, sort them by name. */
+	foreach ($sites as $key => $site) {
+		$environments = terminus("site environments --site=$site->name");
+		usort($environments, function($a, $b) {
+			return strcmp($a->name, $b->name);
+		});
+
+		/* Move 'dev' 'test' 'live' to the beginning of the list. */
+		foreach (array('live','test','dev') as $name) {
+			foreach ($environments as $key2=>$value) {
+				if ($value->name == $name) {
+					$move = $environments[$key2];
+					unset($environments[$key2]);
+					array_unshift($environments, $move);
+				}
+			}
+		}
+		
+		$sites[$key]->environments = $environments;
+	}
+
+	$cache->sites = $sites;
+	save_cache($cache);
 }
 
 /**
- * Build environment selection menu
+ * Build menu for each site
  */
-$items = array(['title'  => 'Environment: '.ucfirst($env_id)]);
-foreach (array('dev','test','live') as $environment) {
-	$items[] = ($env_id == $environment ? ['title'  => '--'.ucfirst($environment), 'color' => 'gray'] : ['title'  => '--'.ucfirst($environment), 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_switch_environment', 'param3' => $environment, 'terminal' => 'false', 'refresh' => 'true']);
-}
-$items[] = '---';
-
 foreach ($sites as $site) {
-  $items[] = ['title' => $site->name, 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'false'];
-  if ($site->framework === 'drupal') {
-    $items[] = ['title' => "$site->name -- 🔒", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'true'];
-  }
-  $items[] = ['title' => '└ Pantheon Dashboard -- ⚡', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $env_id, 'terminal' => 'true'];
-  $items[] = '---';
+	$items[] = ['title' => $site->name];
+	foreach ($site->environments as $environment) {
+		$items[] = ['title' => '--'.$environment->name];
+		$items[] = ['title' => "----Website", 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+		$items[] = ['title' => "----Admin Login", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'true'];
+		$items[] = ['title' => '----Dashboard', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+		$items[] = ['title' => '----Clear Caches', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_clear_cache', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+		if ($environment->name == 'live' AND count($site->environments) > 3) $items[] = ['title' => '--Multidev'];
+	}
 }
 
+/**
+ * Output text in BitBar format
+ */
 echo "⚡\n";
 echo "---\n";
 
@@ -67,20 +98,22 @@ foreach ($items as $item) {
     }
     $item = $item['title'] . ' | ' . implode(' ', $parts);
   }
-
   echo $item . "\n";
 }
+
+echo "---\n";
+echo "Refresh Sites | bash=$php param1=$script param2=clear_cache terminal=false refresh=true";
 exit(0);
 
 /**
  * Open the dashboard for a site
  */
-function pantheon_open_dashboard($site_id) {
-  return browser_open(terminus("site dashboard --print", $site_id));
+function pantheon_open_dashboard($site_id, $env_id) {
+  return browser_open(terminus("site dashboard --print", $site_id, $env_id));
 }
 
 /**
- * Login to the site as User 1 for Drupal
+ * Login to a site as User 1 for Drupal
  */
 function drush_user_login($site_id, $env_id) {
   $login_url = drush($site_id, $env_id, "user-login 1");
@@ -88,28 +121,25 @@ function drush_user_login($site_id, $env_id) {
 }
 
 /**
- * Switch the environment
+ * Clear all caches for a site
  */
-function pantheon_switch_environment($new_env_id) {
-  global $script, $env_id, $config;
-
-  $config->env_id = $new_env_id;
-  save_config($config);
+function pantheon_clear_cache($site_id, $env_id) {
+  terminus("site clear-cache", $site_id, $env_id);
 }
 
 /**
- * Returns the domain for a pantheon site.
+ * Open the URL for a site.
  */
 function pantheon_open_site($site_id, $env_id) {
   $alias = drush_get_alias($site_id, $env_id);
 
-  $url = sprintf('%s://%s', 'https', $alias['uri']);
+  $url = sprintf('%s://%s', 'http', $alias['uri']);
 
   return browser_open($url);
 }
 
 /**
- * Gets a Drush Alias for a Site ID / Env ID
+ * Get the Drush Alias for a Site ID / Env ID
  *
  * @return bool|array
  */
@@ -124,13 +154,6 @@ function drush_get_alias($site_id, $env_id) {
   }
 
   return $aliases[$site_id . '.' . $env_id];
-}
-
-/**
- * Get a list of Pantheon Environments
- */
-function pantheon_get_envs($site_id) {
-  return terminus('site environments', $site_id);
 }
 
 /**
@@ -175,7 +198,7 @@ function drush($site_id, $env_id, $drush_command) {
 }
 
 /**
- * Pass's the command through and returns it
+ * Passes the command through and returns it
  */
 function passthrough_return($command) {
   ob_start();
@@ -198,18 +221,25 @@ function passthrough_return($command) {
 }
 
 /**
- * Gets the config for this plugin
+ * Get the cache for this plugin
  */
-function get_config() {
-  if (file_exists(CONFIG_PATH)) {
-    $config = json_decode(file_get_contents(CONFIG_PATH));
+function get_cache() {
+  if (file_exists(CACHE_PATH)) {
+    $cache = json_decode(file_get_contents(CACHE_PATH));
   }
-  return !empty($config) ? $config : new stdClass();
+  return !empty($cache) ? $cache : new stdClass();
 }
 
 /**
- * Saves the config for this plugin
+ * Save the cache for this plugin
  */
-function save_config($config) {
-  return file_put_contents(CONFIG_PATH, json_encode($config));
+function save_cache($cache) {
+  return file_put_contents(CACHE_PATH, json_encode($cache));
+}
+
+/**
+ * Clear the cache for this plugin
+ */
+function clear_cache() {
+  return file_put_contents(CACHE_PATH, NULL);
 }

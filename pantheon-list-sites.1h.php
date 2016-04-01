@@ -47,17 +47,20 @@ if (isset($cache->sites)) {
 	/* Fetch a list of environments for each site, sort them by name. */
 	foreach ($sites as $key => $site) {
 		$environments = terminus("site environments --site=$site->name");
-		usort($environments, function($a, $b) {
-			return strcmp($a->name, $b->name);
-		});
+		if (is_array($environments))
+		{
+			usort($environments, function($a, $b) {
+				return strcmp($a->name, $b->name);
+			});
 
-		/* Move 'dev' 'test' 'live' to the beginning of the list. */
-		foreach (array('live','test','dev') as $name) {
-			foreach ($environments as $key2=>$value) {
-				if ($value->name == $name) {
-					$move = $environments[$key2];
-					unset($environments[$key2]);
-					array_unshift($environments, $move);
+			/* Move 'dev' 'test' 'live' to the beginning of the list. */
+			foreach (array('live','test','dev') as $name) {
+				foreach ($environments as $key2=>$value) {
+					if ($value->name == $name) {
+						$move = $environments[$key2];
+						unset($environments[$key2]);
+						array_unshift($environments, $move);
+					}
 				}
 			}
 		}
@@ -74,13 +77,18 @@ if (isset($cache->sites)) {
  */
 foreach ($sites as $site) {
 	$items[] = ['title' => $site->name];
-	foreach ($site->environments as $environment) {
-		$items[] = ['title' => '--'.$environment->name];
-		$items[] = ['title' => "----Website", 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
-		$items[] = ['title' => "----Admin Login", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'true'];
-		$items[] = ['title' => '----Dashboard', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
-		$items[] = ['title' => '----Clear Caches', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_clear_cache', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
-		if ($environment->name == 'live' AND count($site->environments) > 3) $items[] = ['title' => '--Multidev'];
+	if (is_array($site->environments))
+	{
+		foreach ($site->environments as $environment) {
+			$items[] = ['title' => '--'.$environment->name];
+			$items[] = ['title' => "----Website", 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_site', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+			$items[] = ['title' => "----Admin Login", 'alternate' => 'true', 'bash' => $php, 'param1' => $script, 'param2' => 'drush_user_login', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'true'];
+			$items[] = ['title' => '----Dashboard', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+			$items[] = ['title' => '----Clear Caches', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_clear_cache', 'param3' => $site->name, 'param4' => $environment->name, 'terminal' => 'false'];
+			if ($environment->name == 'live' AND count($site->environments) > 3) $items[] = ['title' => '--Multidev'];
+		}
+	} else { /* This site is "frozen" and has no environments available. Provide link to Dashboard page with "Unfreeze site" option.  */
+		$items[] = ['title' => '--Dashboard', 'bash' => $php, 'param1' => $script, 'param2' => 'pantheon_open_dashboard', 'param3' => $site->name, 'terminal' => 'false'];
 	}
 }
 
